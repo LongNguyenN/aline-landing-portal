@@ -15,14 +15,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-	            sh "mvn clean package -DskipTests"
+	        //sh "npm run build"
             }
         }
         stage('SonarQube analysis') {
             steps {
                 echo 'Testing..'
                 withSonarQubeEnv('sonarqube-scanner') {
-                    sh "mvn sonar:sonar"
+                    //sh "mvn sonar:sonar"
                 }
             }
         }
@@ -30,14 +30,14 @@ pipeline {
             steps {
                 timeout(time: 1, unit: 'HOURS') {
 			echo "Waiting for quality gate.."
-                            //waitForQualityGate abortPipeline: true
+                        //waitForQualityGate abortPipeline: true
                 }
             }
         } 
         stage('Docker') {
             steps {
                 echo 'Building image with docker....'
-                sh "docker build -t ln/bank ."
+                sh "docker build -t ln/landing-portal ."
             }
         }
         stage('Push to ECR') {
@@ -46,7 +46,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'amazon-id', variable: 'AMAZON_ID')]) {
                     script {
                         docker.withRegistry("https://${AMAZON_ID}.dkr.ecr.us-east-1.amazonaws.com", 'ecr:us-east-1:ln-aws-creds') {
-                            docker.image('ln/bank').push("$TAG")
+                            docker.image('ln/landing-portal').push("$TAG")
                         }
                     }
                 }
@@ -55,7 +55,7 @@ pipeline {
 	stage('Deploy to EKS using eksctl') {
 	    steps {
 		echo "Deploying EKS.."
-		sh "bash ./eks-up.sh"
+		//sh "bash ./eks-up.sh"
 	    }
 	}
     }
